@@ -23,21 +23,23 @@ public class MapGenerator : MonoBehaviour {
 	public AnimationCurve meshHeightCurve;
 
 	public bool autoUpdate;
-
+	public int scaleTexture;
 	public TerrainType[] regions;
+
+	public float TilesFactor;
 
 	public void GenerateMap() {
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
 
-		int tempMapWidth = mapWidth *20;
-		int tempMapHeight = mapHeight *20;
+		int tempMapWidth = mapWidth *scaleTexture;
+		int tempMapHeight = mapHeight *scaleTexture;
 		Color[] colorMap = new Color[tempMapWidth*tempMapHeight];
 		for (int y = 0; y < tempMapHeight; y++) {
 			for (int x = 0; x < tempMapWidth; x++) {
-				float currentHeight = noiseMap[(int)(x/20),(int)(y/20)];
+				float currentHeight = noiseMap[(int)(x/scaleTexture),(int)(y/scaleTexture)];
 				
-				float dx = (float)x/20.0f - (int)(x/20);
-				float dy = (float)y/20.0f - (int)(y/20);
+				float dx = (float)x/scaleTexture - (int)(x/scaleTexture);
+				float dy = (float)y/scaleTexture - (int)(y/scaleTexture);
 				/*Vector2 vec = new Vector2(dx,dy);
 				if ((vec.magnitude < 0.5f)){
 					currentHeight = 0;
