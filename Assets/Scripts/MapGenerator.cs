@@ -60,7 +60,7 @@ public class MapGenerator : MonoBehaviour {
 		} else if (drawMode == DrawMode.ColorMap) {
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(colorMap, mapWidth, mapHeight));
 		} else if (drawMode == DrawMode.Mesh) {
-			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, heightMultiplier, meshHeightCurve), TextureGenerator.ColorMapToTexture(colorMap, tempMapWidth, tempMapHeight));
+			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, heightMultiplier, meshHeightCurve), heightMultiplier, regions);
 		}
 	}
 	
@@ -71,4 +71,6 @@ public struct TerrainType {
 	public string name;
 	public float height;
 	public Color colour;
+	public float TilesFactorTexture;
+	public Texture2D textureDiffuse;
 }
