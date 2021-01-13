@@ -26,7 +26,6 @@ public class MapGenerator : MonoBehaviour {
 	public int scaleTexture;
 	public TerrainType[] regions;
 
-	public float TilesFactor;
 
 	public void GenerateMap() {
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
@@ -71,6 +70,6 @@ public struct TerrainType {
 	public string name;
 	public float height;
 	public Color colour;
-	public float TilesFactorTexture;
+	public float TilesTexture;
 	public Texture2D textureDiffuse;
 }
