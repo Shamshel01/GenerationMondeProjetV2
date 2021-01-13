@@ -12,6 +12,7 @@ public static class TextureGenerator
         texture.Apply();
         return texture;
     }
+    
     public static Texture2D HeightMapToTexture(float[,] heightMap) {
         int width = heightMap.GetLength(0);
 		int height = heightMap.GetLength(1);
