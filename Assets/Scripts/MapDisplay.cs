@@ -33,11 +33,11 @@ public class MapDisplay : MonoBehaviour {
 		???WATER HEIGHT is include in SAND HEIGHT???*/
 
 
-		mat.SetFloat("Vector1_8E34B0D2",0);
-		mat.SetFloat("Vector1_6C7E0CAA",regions[0].height*heightMultiplier);
-		mat.SetFloat("Vector1_8BD4EFA4",regions[1].height*heightMultiplier);
-		mat.SetFloat("Vector1_BF79393F",regions[2].height*heightMultiplier);
-		mat.SetFloat("Vector1_D1BFBE94",regions[3].height*heightMultiplier);
+		// mat.SetFloat("Vector1_8E34B0D2",0);
+		// mat.SetFloat("Vector1_6C7E0CAA",regions[0].height*heightMultiplier);
+		// mat.SetFloat("Vector1_8BD4EFA4",regions[1].height*heightMultiplier);
+		// mat.SetFloat("Vector1_BF79393F",regions[2].height*heightMultiplier);
+		// mat.SetFloat("Vector1_D1BFBE94",regions[3].height*heightMultiplier);
 		
 
 		
@@ -55,11 +55,11 @@ public class MapDisplay : MonoBehaviour {
 		Texture2D_89E80D00 Water Texture*/
 
 
-		mat.SetTexture("Texture2D_4044189C", regions[0].textureDiffuse);
-		mat.SetTexture("Texture2D_4044189C", regions[1].textureDiffuse);
-		mat.SetTexture("Texture2D_CF86792A", regions[2].textureDiffuse);
-		mat.SetTexture("Texture2D_1CD61B64", regions[3].textureDiffuse);
-		mat.SetTexture("Texture2D_E7EFAA73", regions[4].textureDiffuse);
+		// mat.SetTexture("Texture2D_89E80D00", regions[0].textureDiffuse);
+		// mat.SetTexture("Texture2D_4044189C", regions[1].textureDiffuse);
+		// mat.SetTexture("Texture2D_CF86792A", regions[2].textureDiffuse);
+		// mat.SetTexture("Texture2D_1CD61B64", regions[3].textureDiffuse);
+		// mat.SetTexture("Texture2D_E7EFAA73", regions[4].textureDiffuse);
 
 		/*
 		Vector1_FFA2A584 Water Tile Factor
@@ -70,11 +70,11 @@ public class MapDisplay : MonoBehaviour {
 
 
 
-		mat.SetFloat("Vector1_FFA2A584", regions[0].TilesTexture);
-		mat.SetFloat("Vector1_5C52168", regions[1].TilesTexture);
-		mat.SetFloat("Vector1_5D935A7F", regions[2].TilesTexture);
-		mat.SetFloat("Vector1_434FCB7A", regions[3].TilesTexture);
-		mat.SetFloat("Vector1_FCC6C7C1", regions[4].TilesTexture);
+		// mat.SetFloat("Vector1_FFA2A584", regions[0].TilesTexture);
+		// mat.SetFloat("Vector1_5C52168", regions[1].TilesTexture);
+		// mat.SetFloat("Vector1_5D935A7F", regions[2].TilesTexture);
+		// mat.SetFloat("Vector1_434FCB7A", regions[3].TilesTexture);
+		// mat.SetFloat("Vector1_FCC6C7C1", regions[4].TilesTexture);
 
 
 	}
