@@ -27,8 +27,8 @@ public class MapGenerator : MonoBehaviour {
 	public AnimationCurve meshHeightCurve;
 
 	public bool autoUpdate;
-
 	public TerrainType[] regions;
+
 
 	public void GenerateMap() {
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
@@ -62,7 +62,7 @@ public class MapGenerator : MonoBehaviour {
 		} else if (drawMode == DrawMode.ColorMap) {
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(colorMap, mapWidth, mapHeight));
 		} else if (drawMode == DrawMode.Mesh) {
-			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, heightMultiplier, meshHeightCurve), TextureGenerator.ColorMapToTexture(colorMap, mapWidth, mapHeight));
+			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, heightMultiplier, meshHeightCurve), heightMultiplier, regions);
 			
 			for (int i = 0; i < regions.Length; i++) {
 
@@ -149,4 +149,7 @@ public struct TerrainType {
 	public float height;
 	public DecorGenerator.Decor[] decors;
 	public Color colour;
+	public float TilesTexture;
+	public Texture2D textureDiffuse;
+	public Texture2D textureNormal;
 }
