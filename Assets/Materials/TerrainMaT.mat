@@ -60,6 +60,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 5be2617eae40ad74cb947cc23abc19b9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - Texture2D_ECC3C149:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -88,25 +92,45 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_142B600D_Out_0:
+        m_Texture: {fileID: 2800000, guid: 7def4f1ef16215342ba8bb0f9e8b057f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_59045799_Out_0:
+        m_Texture: {fileID: 2800000, guid: 5be2617eae40ad74cb947cc23abc19b9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_5B45EA24_Out_0:
+        m_Texture: {fileID: 2800000, guid: 7f316f91b1033294db619c1c980a91ce, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_A1484ECC_Out_0:
+        m_Texture: {fileID: 2800000, guid: aa701e5be2dbcd24aad4fb9c3ca284da, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_E910141A_Out_0:
+        m_Texture: {fileID: 2800000, guid: c16540716d43a52419d74c2940ffe2b2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - testTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - Vector1_434FCB7A: 0.1
-    - Vector1_4C3F5EE4: 0
-    - Vector1_5857EFB5: 0.6
-    - Vector1_5C52168: 1
-    - Vector1_5D935A7F: 10
-    - Vector1_65D18AD4: 0.8
-    - Vector1_6C7E0CAA: 8
-    - Vector1_6F228B9F: 0.3
-    - Vector1_8BD4EFA4: 24
-    - Vector1_8E34B0D2: 12
+    - Vector1_4C3F5EE4: 0.4
+    - Vector1_5857EFB5: 0.8
+    - Vector1_5C52168: 0.1
+    - Vector1_5D935A7F: 2.14
+    - Vector1_65D18AD4: 0.9
+    - Vector1_6C7E0CAA: 4
+    - Vector1_6F228B9F: 0.5
+    - Vector1_8BD4EFA4: 8
+    - Vector1_8E34B0D2: 0
     - Vector1_A956083A: 1
-    - Vector1_BF79393F: 28.5
+    - Vector1_BF79393F: 28
     - Vector1_D16D1096: 0
-    - Vector1_D1BFBE94: 30
+    - Vector1_D1BFBE94: 36
     - Vector1_FCC6C7C1: 0.1
     - Vector1_FFA2A584: 0.1
     - _AlphaClip: 0

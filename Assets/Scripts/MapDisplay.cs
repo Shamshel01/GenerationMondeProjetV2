@@ -31,19 +31,16 @@ public class MapDisplay : MonoBehaviour {
 		Vector1_D1BFBE94 SnowHeight
 		Vector1_8E34B0D2 Water Height
 		???WATER HEIGHT is include in SAND HEIGHT???*/
-		
-		mat.SetFloat("Vector1_8E34B0D2",regions[0].height*heightMultiplier);
-		mat.SetFloat("Vector1_BF79393F",regions[1].height*heightMultiplier);
-		mat.SetFloat("Vector1_8BD4EFA4",regions[2].height*heightMultiplier);
-		mat.SetFloat("Vector1_BF79393F",regions[3].height*heightMultiplier);
-		mat.SetFloat("Vector1_D1BFBE94",regions[4].height*heightMultiplier);
-		
-		/*
+
+
 		mat.SetFloat("Vector1_8E34B0D2",0);
-		mat.SetFloat("Vector1_BF79393F",regions[0].height*heightMultiplier);
+		mat.SetFloat("Vector1_6C7E0CAA",regions[0].height*heightMultiplier);
 		mat.SetFloat("Vector1_8BD4EFA4",regions[1].height*heightMultiplier);
 		mat.SetFloat("Vector1_BF79393F",regions[2].height*heightMultiplier);
-		mat.SetFloat("Vector1_D1BFBE94",regions[3].height*heightMultiplier);*/
+		mat.SetFloat("Vector1_D1BFBE94",regions[3].height*heightMultiplier);
+		
+
+		
 		UnityEngine.Debug.Log("Water Height  " +mat.GetFloat("Vector1_8E34B0D2"));
 		UnityEngine.Debug.Log("Sand Height  " +mat.GetFloat("Vector1_BF79393F"));
 		UnityEngine.Debug.Log("Grass Height  " +mat.GetFloat("Vector1_8BD4EFA4"));
@@ -57,6 +54,7 @@ public class MapDisplay : MonoBehaviour {
 		Texture2D_E7EFAA73 Snow Diffuse Texture
 		Texture2D_89E80D00 Water Texture*/
 
+
 		mat.SetTexture("Texture2D_4044189C", regions[0].textureDiffuse);
 		mat.SetTexture("Texture2D_4044189C", regions[1].textureDiffuse);
 		mat.SetTexture("Texture2D_CF86792A", regions[2].textureDiffuse);
@@ -69,6 +67,8 @@ public class MapDisplay : MonoBehaviour {
 		Vector1_5D935A7F Grass Tile Factor
 		Vector1_434FCB7A Rock Tile Factor
 		Vector1_FCC6C7C1 Snow Tile Factor*/
+
+
 
 		mat.SetFloat("Vector1_FFA2A584", regions[0].TilesTexture);
 		mat.SetFloat("Vector1_5C52168", regions[1].TilesTexture);

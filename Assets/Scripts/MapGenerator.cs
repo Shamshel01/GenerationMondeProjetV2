@@ -72,4 +72,5 @@ public struct TerrainType {
 	public Color colour;
 	public float TilesTexture;
 	public Texture2D textureDiffuse;
+	public Texture2D textureNormal;
 }
