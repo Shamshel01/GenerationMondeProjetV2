@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Materials/NoiseTextures.meta
 guid: f42be5cd83cdb8f4b92be7f5cb9307aa
+=======
+guid: cb97f93d00819964b98298cdaa399f2d
+>>>>>>> 35f0bf17d569e6fc7e02e77569549a08968d1b12:Assets/Decors.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

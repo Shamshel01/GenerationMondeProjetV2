@@ -1,6 +1,12 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Tree.prefab.meta
 guid: 1bde59c58ee8d7e4abc33daf8bbb99b4
 PrefabImporter:
+=======
+guid: 281cb99bed8c2d3c7b780c826619bab7
+folderAsset: yes
+DefaultImporter:
+>>>>>>> 35f0bf17d569e6fc7e02e77569549a08968d1b12:Assets/Materials/SkyDome Mat.meta
   externalObjects: {}
   userData: 
   assetBundleName: 
