@@ -1,94 +1,88 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class EndlessTerrain : MonoBehaviour
-{
-    public const float maxViewDistance = 400;
-    public Transform viewer;
-    public static Vector2 viewerPosition;
-    int chunkSize;
-    int chunksVisibleInViewDistance;
-    // Start is called before the first frame update
+public class EndlessTerrain : MonoBehaviour {
 
+	public const float maxViewDst = 450;
+	public Transform viewer;
 
-    Dictionary<Vector2,TerrainChunk> terrainChunkDico = new Dictionary<Vector2, TerrainChunk>();
-    List<TerrainChunk> terrainVisibleInTheLastUpdate;
-    void Start()
-    {
-        chunkSize = MapGenerator.sizeMapChunk - 1; // If not => some problems
-        chunksVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance/chunkSize);
-    }
+	public static Vector2 viewerPosition;
+	int chunkSize;
+	int chunksVisibleInViewDst;
 
+	Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
+	List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
 
-    void UpdateVisibleChunks() {
+	void Start() {
+		chunkSize = MapGenerator.sizeMapChunk - 1;
+		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
+	}
 
-        for (int i=0 ; i < terrainVisibleInTheLastUpdate.Count; i++) {
-            terrainVisibleInTheLastUpdate[i].setVisible(false);
-        }
-        terrainVisibleInTheLastUpdate.Clear();
+	void Update() {
+		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z);
+		UpdateVisibleChunks ();
+	}
+		
+	void UpdateVisibleChunks() {
 
+		for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++) {
+			terrainChunksVisibleLastUpdate [i].SetVisible (false);
+		}
+		terrainChunksVisibleLastUpdate.Clear ();
+			
+		int currentChunkCoordX = Mathf.RoundToInt (viewerPosition.x / chunkSize);
+		int currentChunkCoordY = Mathf.RoundToInt (viewerPosition.y / chunkSize);
 
+		for (int yOffset = -chunksVisibleInViewDst; yOffset <= chunksVisibleInViewDst; yOffset++) {
+			for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++) {
+				Vector2 viewedChunkCoord = new Vector2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
-        int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
-        int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / chunkSize);
+				if (terrainChunkDictionary.ContainsKey (viewedChunkCoord)) {
+					terrainChunkDictionary [viewedChunkCoord].UpdateTerrainChunk ();
+					if (terrainChunkDictionary [viewedChunkCoord].IsVisible ()) {
+						terrainChunksVisibleLastUpdate.Add (terrainChunkDictionary [viewedChunkCoord]);
+					}
+				} else {
+					terrainChunkDictionary.Add (viewedChunkCoord, new TerrainChunk (viewedChunkCoord, chunkSize, transform));
+				}
 
-        for (int yOffset = - chunksVisibleInViewDistance; yOffset <= chunksVisibleInViewDistance; yOffset++) {
-            for (int xOffset = - chunksVisibleInViewDistance; xOffset <= chunksVisibleInViewDistance; xOffset++) {
-                Vector2 viewedChunkCoord = new Vector2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
-                if (terrainChunkDico.ContainsKey(viewedChunkCoord)) {
-                    
-                    terrainChunkDico[viewedChunkCoord].UpdateChunk();
-                    if (terrainChunkDico[viewedChunkCoord].isVisible()) {
-                        terrainVisibleInTheLastUpdate.Add(terrainChunkDico[viewedChunkCoord]);
-                    }
+			}
+		}
+	}
 
+	public class TerrainChunk {
 
-                } else 
-                    terrainChunkDico.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord,chunkSize));
-
-            }
-        }
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
-        UpdateVisibleChunks();
-    }
-
+		GameObject meshObject;
+		Vector2 position;
+		Bounds bounds;
 
 
+		public TerrainChunk(Vector2 coord, int size, Transform parent) {
+			position = coord * size;
+			bounds = new Bounds(position,Vector2.one * size);
+			Vector3 positionV3 = new Vector3(position.x,0,position.y);
 
-    public class TerrainChunk {
-        Vector2 position;
-        GameObject meshObject;
+			meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+			meshObject.transform.position = positionV3;
+			meshObject.transform.localScale = Vector3.one * size /10f;
+			meshObject.transform.parent = parent;
+			SetVisible(false);
+		}
 
-        Bounds bounds;
-        public TerrainChunk(Vector2 coord, int size) {
-            position = coord * size;
-            bounds = new Bounds(position,Vector2.one*size);
-            Vector3 position3 = new Vector3(position.x,0,position.y);
-            meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            meshObject.transform.position = position3;
-            meshObject.transform.localScale = Vector3.one*size/10f;
-            setVisible(false);
-        }
+		public void UpdateTerrainChunk() {
+			float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance (viewerPosition));
+			bool visible = viewerDstFromNearestEdge <= maxViewDst;
+			SetVisible (visible);
+		}
 
-        public void UpdateChunk() {
+		public void SetVisible(bool visible) {
+			meshObject.SetActive (visible);
+		}
 
-            float viewerDistanceFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
-            bool visible = viewerDistanceFromNearestEdge <= maxViewDistance;
-            setVisible(false);
-        }
+		public bool IsVisible() {
+			return meshObject.activeSelf;
+		}
 
-        public void setVisible(bool visible) {
-            meshObject.SetActive(visible);
-        }
-
-        public bool isVisible() {
-            return meshObject.activeSelf;
-        }
-    }
+	}
 }
-
