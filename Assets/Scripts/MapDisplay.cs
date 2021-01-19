@@ -40,13 +40,13 @@ public class MapDisplay : MonoBehaviour {
 		// mat.SetFloat("Vector1_D1BFBE94",regions[3].height*heightMultiplier);
 		
 
-		
+		/*
 		UnityEngine.Debug.Log("Water Height  " +mat.GetFloat("Vector1_8E34B0D2"));
 		UnityEngine.Debug.Log("Sand Height  " +mat.GetFloat("Vector1_BF79393F"));
 		UnityEngine.Debug.Log("Grass Height  " +mat.GetFloat("Vector1_8BD4EFA4"));
 		UnityEngine.Debug.Log("Rock Height  " +mat.GetFloat("Vector1_BF79393F"));
 		UnityEngine.Debug.Log("Snow Height  " +mat.GetFloat("Vector1_D1BFBE94"));
-
+*/
 		/*
 	  	Texture2D_4044189C Sand Diffuse Texture
 		Texture2D_CF86792A Grass Diffuse Texture

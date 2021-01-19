@@ -64,7 +64,6 @@ public class MapGenerator : MonoBehaviour {
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(mapData.colourMap, sizeMapChunk, sizeMapChunk));
 		} else if (drawMode == DrawMode.Mesh) {
 			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, heightMultiplier, meshHeightCurve, levelOfDetail), heightMultiplier, regions);
-			
 
 
 			for (int i = 0; i < regions.Length; i++) {
@@ -74,11 +73,11 @@ public class MapGenerator : MonoBehaviour {
 			regionsObject.transform.SetParent(decorsObject.transform);
 
 			DecorGenerator.Decor[] decors = regions[i].decors;
-			float low = 0;
-			if (i != 0) {
-				low = regions[i - 1].height;
-			}
-			bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, regions[i].height, low);
+			float high = 1;
+			if (i != regions.Length -1 ) {
+				high = regions[i+1].height;
+			} 
+			bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, regions[i].height, high);
 		
 			
 			for (int j = 0; j < decors.Length; j++) {
@@ -86,24 +85,24 @@ public class MapGenerator : MonoBehaviour {
 				parentObject.transform.SetParent(regionsObject.transform);
 				parentObject.name = decors[j].name;
 
-				//UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
+			//	UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
 				
 				System.Random prng = new System.Random(seed);
-				print(decors[j].number);
+				print(decors.Length);
 				int cpt = 0;
+				int maxLoop = 3000;
+				int lp = 0;
 				UnityEngine.Vector2[] decorCoords = new UnityEngine.Vector2[decors[j].number];
-				
-				while (cpt < decors[j].number) {
+				print(decors[j].number);
+				while (cpt < decors[j].number && lp < maxLoop) {
 					
 					int x = prng.Next(0, sizeMapChunk);
 					int y = prng.Next(0, sizeMapChunk);
-					
 					if (regionMap[x, y]) {
 						decorCoords[cpt] = new UnityEngine.Vector2(x, y);
-						
+						cpt++;
 					}
-					cpt++;
-					print("Dans la boucle");
+					lp++;
 				}
 
 				PlaceDecor(decorCoords, mapData.heightMap, decors[j].name, decors[j].scale, decors[j].mesh, parentObject);
@@ -123,30 +122,6 @@ public class MapGenerator : MonoBehaviour {
 			}
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(decorMap, sizeMapChunk, sizeMapChunk));*/
 		}
-	}
-
-	public void affectDecorsToChunk( float[,] heightmap, GameObject decorsObject) {
-		for (int i = 0; i < regions.Length; i++) {
-				
-			GameObject regionsObject = new GameObject();
-			regionsObject.name = regions[i].name;
-			regionsObject.transform.SetParent(decorsObject.transform);
-
-			DecorGenerator.Decor[] decors = regions[i].decors;
-			float low = 0;
-			if (i != 0) {
-				low = regions[i - 1].height;
-			}
-			bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, heightmap, regions[i].height, low);
-			
-
-			for (int j = 0; j < decors.Length; j++) {
-					UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
-					PlaceDecor(decorCoords, heightmap, decors[j].name, decors[j].scale, decors[j].mesh, regionsObject);
-			}
-		}
-
-
 	}
 
 
@@ -209,8 +184,7 @@ public class MapGenerator : MonoBehaviour {
 						colorMap[y*sizeMapChunk + x] = regions[i].colour;
 						break;
 					}
-				}
-									
+				}						
 			}
 
 		}
@@ -232,10 +206,11 @@ public class MapGenerator : MonoBehaviour {
 
 	public void PlaceDecor(UnityEngine.Vector2[] decorCoords, float[,] heightMap, string name, float scale, GameObject decorObject, GameObject parentObject)
     {
+		
 		if (decorObject == null) {
+			UnityEngine.Debug.Log("Decors null");
 			return;
 		}
-		
 		int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
         float topLeftX = (width - 1)/-2f;
@@ -255,6 +230,7 @@ public class MapGenerator : MonoBehaviour {
             rotation.z = decor.transform.rotation.z;
             decor.transform.rotation = rotation;
             decor.transform.SetParent(parentObject.transform);
+			//UnityEngine.Debug.Log("x : "+x.ToString()+ " y: " +y.ToString());
         }
     }
 
