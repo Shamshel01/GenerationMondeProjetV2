@@ -9,7 +9,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 using System.Threading;
-using System;
 
 public class MapGenerator : MonoBehaviour {
 
@@ -39,14 +38,25 @@ public class MapGenerator : MonoBehaviour {
 	public float heightMultiplier;
 	public AnimationCurve meshHeightCurve;
 
-	public bool autoUpdate;
+	//public bool autoUpdate;
+	public bool autoUpdate = false;
 	public TerrainType[] regions;
 	Queue <MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue <MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
 
 	public void drawMapEditor() {
-		MapData mapData = GenerateChunkMap(UnityEngine.Vector2.zero);
+		string decorsObjectName = "Decors";
+		GameObject[] existingDecorObjects = GameObject.FindGameObjectsWithTag(decorsObjectName);
+		for (int i = 0; i < existingDecorObjects.Length; i++) {
+			DestroyImmediate(existingDecorObjects[i]);
+		}
+
+		GameObject decorsObject = new GameObject();
+		decorsObject.name = decorsObjectName;
+		decorsObject.tag = decorsObjectName;
+		MapData mapData = GenerateChunkMap(UnityEngine.Vector2.zero, decorsObject);
+
 		MapDisplay display = FindObjectOfType<MapDisplay> ();
 		if (drawMode == DrawMode.NoiseMap) {
 			display.DrawTexture(TextureGenerator.HeightMapToTexture(mapData.heightMap));
@@ -54,52 +64,102 @@ public class MapGenerator : MonoBehaviour {
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(mapData.colourMap, sizeMapChunk, sizeMapChunk));
 		} else if (drawMode == DrawMode.Mesh) {
 			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, heightMultiplier, meshHeightCurve, levelOfDetail), heightMultiplier, regions);
-		/*	
+			
+
+
 			for (int i = 0; i < regions.Length; i++) {
+				
+			GameObject regionsObject = new GameObject();
+			regionsObject.name = regions[i].name;
+			regionsObject.transform.SetParent(decorsObject.transform);
 
-				GameObject regionsObject = new GameObject();
-				regionsObject.name = regions[i].name;
-				regionsObject.transform.SetParent(decorsObject.transform);
-
-				DecorGenerator.Decor[] decors = regions[i].decors;
-				float low = 0;
-				if (i != 0) {
-					low = regions[i - 1].height;
-				}
-				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, noiseMap, regions[i].height, low);
-
-				for (int j = 0; j < decors.Length; j++) {
-					GameObject parentObject = new GameObject();
-					parentObject.transform.SetParent(regionsObject.transform);
-					parentObject.name = decors[j].name;
-					UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
-					PlaceDecor(decorCoords, noiseMap, decors[j].name, decors[j].scale, decors[j].mesh, parentObject);
-				}
+			DecorGenerator.Decor[] decors = regions[i].decors;
+			float low = 0;
+			if (i != 0) {
+				low = regions[i - 1].height;
 			}
+			bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, regions[i].height, low);
+		
+			
+			for (int j = 0; j < decors.Length; j++) {
+				GameObject parentObject = new GameObject();
+				parentObject.transform.SetParent(regionsObject.transform);
+				parentObject.name = decors[j].name;
 
-		} else if (drawMode == DrawMode.DecorMap) {
+				//UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
+				
+				System.Random prng = new System.Random(seed);
+				print(decors[j].number);
+				int cpt = 0;
+				UnityEngine.Vector2[] decorCoords = new UnityEngine.Vector2[decors[j].number];
+				
+				while (cpt < decors[j].number) {
+					
+					int x = prng.Next(0, sizeMapChunk);
+					int y = prng.Next(0, sizeMapChunk);
+					
+					if (regionMap[x, y]) {
+						decorCoords[cpt] = new UnityEngine.Vector2(x, y);
+						
+					}
+					cpt++;
+					print("Dans la boucle");
+				}
+
+				PlaceDecor(decorCoords, mapData.heightMap, decors[j].name, decors[j].scale, decors[j].mesh, parentObject);
+			}
+		}
+			
+		
+		/*} else if (drawMode == DrawMode.DecorMap) {
 			Color[] decorMap = new Color[sizeMapChunk*sizeMapChunk];
 			for (int i = 0; i < regions.Length; i++) {
 				float low = 0;
 				if (i != 0) {
 					low = regions[i - 1].height;
 				}
-				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, noiseMap, regions[i].height, low);
-				decorMap = DecorGenerator.GenerateDecorMap(colorMap, sizeMapChunk, sizeMapChunk, regions[i].decors, regionMap);
+				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, regions[i].height, low);
+				decorMap = DecorGenerator.GenerateDecorMap(mapData.colourMap, sizeMapChunk, sizeMapChunk, regions[i].decors, regionMap);
 			}
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(decorMap, sizeMapChunk, sizeMapChunk));*/
 		}
 	}
 
-	public void RequestMapData(UnityEngine.Vector2 offSetCoord, Action<MapData> callback) {
+	public void affectDecorsToChunk( float[,] heightmap, GameObject decorsObject) {
+		for (int i = 0; i < regions.Length; i++) {
+				
+			GameObject regionsObject = new GameObject();
+			regionsObject.name = regions[i].name;
+			regionsObject.transform.SetParent(decorsObject.transform);
+
+			DecorGenerator.Decor[] decors = regions[i].decors;
+			float low = 0;
+			if (i != 0) {
+				low = regions[i - 1].height;
+			}
+			bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, heightmap, regions[i].height, low);
+			
+
+			for (int j = 0; j < decors.Length; j++) {
+					UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
+					PlaceDecor(decorCoords, heightmap, decors[j].name, decors[j].scale, decors[j].mesh, regionsObject);
+			}
+		}
+
+
+	}
+
+
+	public void RequestMapData(UnityEngine.Vector2 offSetCoord, Action<MapData> callback, GameObject decorsThreadSafe) {
 		ThreadStart threadStart = delegate {
-			mapDataThread(offSetCoord, callback);
+			mapDataThread(offSetCoord, callback, decorsThreadSafe);
 		};
 		new Thread(threadStart).Start();
 	}
 
-	void mapDataThread(UnityEngine.Vector2 offsetCoord,Action <MapData> callback){
-		MapData mapData = GenerateChunkMap(offsetCoord);
+	void mapDataThread(UnityEngine.Vector2 offsetCoord,Action <MapData> callback, GameObject decorsThreadSafe){
+
+		MapData mapData = GenerateChunkMap(offsetCoord, decorsThreadSafe);
 		lock (mapDataThreadInfoQueue) {
 			mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback,mapData));
 		}
@@ -136,33 +196,25 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
-	MapData GenerateChunkMap(UnityEngine.Vector2 offsetCoord) {
+	MapData GenerateChunkMap(UnityEngine.Vector2 offsetCoord, GameObject decorsThreadSafe) {
 		float[,] noiseMap = Noise.GenerateNoiseMap(sizeMapChunk, sizeMapChunk, seed, noiseScale, octaves, persistance, lacunarity,offsetCoord + offset, normalizeMode);
 
 		Color[] colorMap = new Color[sizeMapChunk*sizeMapChunk];
 		for (int y = 0; y < sizeMapChunk; y++) {
 			for (int x = 0; x < sizeMapChunk; x++) {
 				float currentHeight = noiseMap[x, y];
-				for (int i = 0; i < regions.Length; i++) {
-					if (currentHeight >= regions[i].height) {
+
+				for (int i = 0; i < regions.Length-1; i++) {
+					if (currentHeight < regions[i+1].height) {
 						colorMap[y*sizeMapChunk + x] = regions[i].colour;
 						break;
 					}
 				}
+									
 			}
-		}
-	/*
-		string decorsObjectName = "Decors";
-		GameObject[] existingDecorObjects = GameObject.FindGameObjectsWithTag(decorsObjectName);
-		for (int i = 0; i < existingDecorObjects.Length; i++) {
-			DestroyImmediate(existingDecorObjects[i]);
-		}
 
-		GameObject decorsObject = new GameObject();
-		decorsObject.name = decorsObjectName;
-		decorsObject.tag = decorsObjectName;*/
-
-		return new MapData(noiseMap,colorMap);
+		}
+		return new MapData(noiseMap,colorMap,decorsThreadSafe);
 	}
 
 	public bool[,] GetRegion(int width, int height, float[,] heightMap, float high, float low) {
@@ -180,7 +232,6 @@ public class MapGenerator : MonoBehaviour {
 
 	public void PlaceDecor(UnityEngine.Vector2[] decorCoords, float[,] heightMap, string name, float scale, GameObject decorObject, GameObject parentObject)
     {
-
 		if (decorObject == null) {
 			return;
 		}
@@ -223,8 +274,6 @@ public class MapGenerator : MonoBehaviour {
 [System.Serializable]
 public struct TerrainType {
 	public string name;
-
-	[Range(0,1)]
 	public float height;
 	public DecorGenerator.Decor[] decors;
 	public Color colour;
@@ -237,9 +286,10 @@ public struct TerrainType {
 public struct MapData {
 	public float[,] heightMap;
 	public Color[] colourMap;
-
-	public MapData(float[,] heightMap, Color[] colourMap) {
+	public GameObject DecorChunckObjects;
+	public MapData(float[,] heightMap, Color[] colourMap, GameObject arrayDecorsObject) {
 		this.heightMap = heightMap;
 		this.colourMap = colourMap;
+		this.DecorChunckObjects = arrayDecorsObject;
 	}
 }
