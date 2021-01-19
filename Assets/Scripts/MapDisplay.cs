@@ -12,7 +12,7 @@ public class MapDisplay : MonoBehaviour {
 		textureRender.sharedMaterial.mainTexture = texture;
 		textureRender.transform.localScale = new Vector3(texture.width, 1, texture.height);
 	}
-	
+
 	public void DrawMesh(MeshData meshData, float heightMultiplier, TerrainType[] regions) {
 		meshFilter.sharedMesh = meshData.CreateMesh();
 		//textureRender.material.,

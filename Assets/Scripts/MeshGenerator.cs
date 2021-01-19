@@ -9,6 +9,7 @@ public static class MeshGenerator
         int height = heightMap.GetLength(1);
         float topLeftX = (width - 1)/-2f;
         float topLeftZ = (height - 1)/2f;
+        AnimationCurve heightCurveThread = new AnimationCurve(heightCurve.keys);
 
         int meshSimplificationIncrement = (levelOfDetail ==0)?1:levelOfDetail*2;
 
@@ -18,7 +19,7 @@ public static class MeshGenerator
 
         for (int y = 0; y < height; y += meshSimplificationIncrement) {
 			for (int x = 0; x < width; x += meshSimplificationIncrement) {
-                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap[x, y]*heightMultiplier*heightCurve.Evaluate(heightMap[x, y]), topLeftZ - y);
+                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap[x, y]*heightMultiplier*heightCurveThread.Evaluate(heightMap[x, y]), topLeftZ - y);
                 meshData.uvs[vertexIndex] = new Vector2(x/(float)width, y/(float)height);
                 
                 if (x < width - 1 && y < height - 1) {
