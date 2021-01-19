@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 using System.Net;
 using System.Drawing;
 using System.Numerics;
@@ -6,6 +7,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class MapGenerator : MonoBehaviour {
 
@@ -63,7 +65,8 @@ public class MapGenerator : MonoBehaviour {
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(colorMap, mapWidth, mapHeight));
 		} else if (drawMode == DrawMode.Mesh) {
 			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, heightMultiplier, meshHeightCurve), TextureGenerator.ColorMapToTexture(colorMap, mapWidth, mapHeight));
-			
+		
+			UnityEngine.Vector2 sampleRegionSize = new UnityEngine.Vector2(mapWidth, mapHeight);
 			for (int i = 0; i < regions.Length; i++) {
 
 				GameObject regionsObject = new GameObject();
@@ -77,13 +80,8 @@ public class MapGenerator : MonoBehaviour {
 				}
 				bool[,] regionMap = GetRegion(mapWidth, mapHeight, noiseMap, regions[i].height, low);
 
-				for (int j = 0; j < decors.Length; j++) {
-					GameObject parentObject = new GameObject();
-					parentObject.transform.SetParent(regionsObject.transform);
-					parentObject.name = decors[j].name;
-					UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(mapWidth, mapHeight, decors[j].number, decors[j].seed, regionMap);
-					PlaceDecor(decorCoords, noiseMap, decors[j].name, decors[j].scale, decors[j].mesh, parentObject);
-				}
+				List<DecorGenerator.PoissonCoord> decorCoords = DecorGenerator.GeneratePoints(decors, sampleRegionSize, regions[i].numberOfDecors, regionMap);
+				PlaceDecor(decorCoords, noiseMap, decors, regionsObject);
 			}
 
 		} else if (drawMode == DrawMode.DecorMap) {
@@ -94,7 +92,7 @@ public class MapGenerator : MonoBehaviour {
 					low = regions[i - 1].height;
 				}
 				bool[,] regionMap = GetRegion(mapWidth, mapHeight, noiseMap, regions[i].height, low);
-				decorMap = DecorGenerator.GenerateDecorMap(colorMap, mapWidth, mapHeight, regions[i].decors, regionMap);
+				decorMap = DecorGenerator.GenerateDecorMap(colorMap, mapWidth, mapHeight, regions[i].decors, regionMap, regions[i].numberOfDecors);
 			}
 			display.DrawTexture(TextureGenerator.ColorMapToTexture(decorMap, mapWidth, mapHeight));
 		}
@@ -113,27 +111,34 @@ public class MapGenerator : MonoBehaviour {
 		return region;
 	}
 
-	public void PlaceDecor(UnityEngine.Vector2[] decorCoords, float[,] heightMap, string name, float scale, GameObject decorObject, GameObject parentObject)
-    {
-
-		if (decorObject == null) {
-			return;
-		}
-		
+	public void PlaceDecor(List<DecorGenerator.PoissonCoord> decorCoords, float[,] heightMap, DecorGenerator.Decor[] decors, GameObject parentObject) {
 		int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
         float topLeftX = (width - 1)/-2f;
         float topLeftZ = (height - 1)/2f;
+ 
+        System.Random prng = new System.Random();
 
-        for (int i = 0; i < decorCoords.Length; i++)
+        for (int i = 0; i < decorCoords.Count; i++)
         {
-			int x = (int)decorCoords[i].x;
-			int y = (int)decorCoords[i].y;
+			int x = (int)decorCoords[i].coords.x;
+			int y = (int)decorCoords[i].coords.y;
+
 			float currentHeight = heightMap[x, y]*heightMultiplier*meshHeightCurve.Evaluate(heightMap[x, y]);
+			DecorGenerator.Decor decorToPlace = decors[decorCoords[i].index];
             UnityEngine.Vector3 position = new UnityEngine.Vector3(topLeftX + x, currentHeight, topLeftZ - y);
-            GameObject decor = Instantiate(decorObject, position, decorObject.transform.rotation);
+            GameObject decor = Instantiate(decorToPlace.mesh, position, decorToPlace.mesh.transform.rotation);
 			decor.name = name + "_" + i.ToString();
-			decor.transform.localScale = new UnityEngine.Vector3(scale, scale, scale);
+
+			float scaleDif = decorToPlace.scaleDif;
+			if (scaleDif > 1) {
+				scaleDif = 1;
+			} else if (scaleDif < 0) {
+				scaleDif = 0;
+			}
+
+			float randomScale = decorToPlace.scale*(1.0f + (2*(float)prng.NextDouble() - 1)*scaleDif);
+			decor.transform.localScale = new UnityEngine.Vector3(randomScale, randomScale, randomScale);
             UnityEngine.Quaternion rotation = UnityEngine.Random.rotation;
             rotation.x = decor.transform.rotation.x;
             rotation.z = decor.transform.rotation.z;
@@ -147,6 +152,7 @@ public class MapGenerator : MonoBehaviour {
 public struct TerrainType {
 	public string name;
 	public float height;
+	public int numberOfDecors;
 	public DecorGenerator.Decor[] decors;
 	public Color colour;
 }
