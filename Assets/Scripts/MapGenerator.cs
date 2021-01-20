@@ -72,14 +72,14 @@ public class MapGenerator : MonoBehaviour {
 				regionsObject.transform.SetParent(decorsObject.transform);
 
 				DecorGenerator.Decor[] decors = regions[i].decors;
-				float low = 0;
-				if (i != 0) {
-					low = regions[i - 1].height;
+				
+				float low = regions[i].height;
+				float high = 1;
+				if (i != regions.Length - 1) {
+					high = regions[i + 1].height;
 				}
-				float high = regions[i].height;
-
 				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, low, high);
-				List<DecorGenerator.PoissonCoord> decorCoords = DecorGenerator.GeneratePoints(decors, sampleRegionSize, regions[i].numberOfDecors, regionMap);
+				List<DecorGenerator.PoissonCoord> decorCoords = DecorGenerator.GeneratePoints(decors, sampleRegionSize, regions[i].densityOfDecors, regionMap);
 				PlaceDecor(decorCoords, mapData.heightMap, decors, regionsObject);		
 				
 
@@ -219,7 +219,7 @@ public class MapGenerator : MonoBehaviour {
 public struct TerrainType {
 	public string name;
 	public float height;
-	public int numberOfDecors;
+	public int densityOfDecors;
 	public DecorGenerator.Decor[] decors;
 	public Color colour;
 
