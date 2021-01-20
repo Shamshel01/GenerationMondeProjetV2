@@ -149,7 +149,8 @@ public class MapGenerator : MonoBehaviour {
 				}						
 			}
 		}
-		return new MapData(noiseMap,colorMap,decorsThreadSafe);
+		float[] density = new float[] {0.1f};
+		return new MapData(noiseMap,colorMap,decorsThreadSafe,density);
 	}
 
 	public bool[,] GetRegion(int width, int height, float[,] heightMap, float low, float high) {
@@ -231,9 +232,11 @@ public struct MapData {
 	public float[,] heightMap;
 	public Color[] colourMap;
 	public GameObject DecorChunckObjects;
-	public MapData(float[,] heightMap, Color[] colourMap, GameObject arrayDecorsObject) {
+	public float[] densityArrayObject;
+	public MapData(float[,] heightMap, Color[] colourMap, GameObject arrayDecorsObject, float[] densityArrayObject) {
 		this.heightMap = heightMap;
 		this.colourMap = colourMap;
 		this.DecorChunckObjects = arrayDecorsObject;
+		this.densityArrayObject = densityArrayObject;
 	}
 }
