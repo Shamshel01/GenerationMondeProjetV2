@@ -14,31 +14,12 @@ public static class DecorGenerator
     [System.Serializable]
     public struct Decor {
         public string name;
-        public int number;
-        public int seed;
         public float scale;
         public float scaleDif;
         public float radius;
 		public int rejectionSamples;
         public GameObject mesh;
         public Color color;
-    }
-
-    public static List<UnityEngine.Vector2> GenerateDecor(int width, int height, int decors, int seed, bool[,] regionMap) {
-
-        System.Random prng = new System.Random(seed);
-		List<UnityEngine.Vector2> decorCoords = new List<UnityEngine.Vector2>();
-        
-		for (int i = 0; i < decors; i++) {
-			int x = prng.Next(0, width);
-			int y = prng.Next(0, height);
-
-            if (regionMap[x, y]) {
-			    decorCoords.Add(new UnityEngine.Vector2(x, y));
-            }
-		}
-
-        return decorCoords;
     }
 
     public static Color[] GenerateDecorMap(Color[] decorMap, int width, int height, Decor[] decors, bool[,] regionMap, int numberOfPoints) {
