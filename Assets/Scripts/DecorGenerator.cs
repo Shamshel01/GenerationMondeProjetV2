@@ -24,20 +24,17 @@ public static class DecorGenerator
         public Color color;
     }
 
-    public static UnityEngine.Vector2[] GenerateDecor(int width, int height, int decors, int seed, bool[,] regionMap) {
+    public static List<UnityEngine.Vector2> GenerateDecor(int width, int height, int decors, int seed, bool[,] regionMap) {
 
         System.Random prng = new System.Random(seed);
+		List<UnityEngine.Vector2> decorCoords = new List<UnityEngine.Vector2>();
         
-        int cpt = 0;
-		UnityEngine.Vector2[] decorCoords = new UnityEngine.Vector2[decors];
-        
-		while (cpt < decors) {
+		for (int i = 0; i < decors; i++) {
 			int x = prng.Next(0, width);
 			int y = prng.Next(0, height);
 
             if (regionMap[x, y]) {
-			    decorCoords[cpt] = new UnityEngine.Vector2(x, y);
-                cpt++;
+			    decorCoords.Add(new UnityEngine.Vector2(x, y));
             }
 		}
 

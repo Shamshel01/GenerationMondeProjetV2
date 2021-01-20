@@ -8,46 +8,44 @@ using System.ComponentModel.DataAnnotations;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 public class MapGenerator : MonoBehaviour {
 
-	public enum DrawMode{NoiseMap, ColorMap, Mesh, DecorMap};
+
+	// TO DO AND RANGE VALUES for variables 
+
+	public enum DrawMode{NoiseMap, ColorMap, Mesh, DecorMap}; 
 	public DrawMode drawMode;
 
-	public int mapWidth;
-	public int mapHeight;
 	public float noiseScale;
+	public Noise.NormalizeMode normalizeMode;
 
+	[Range(0,6)]
+	public int levelOfDetail;
+
+
+	[Range(0,8)]
 	public int octaves;
+
+	[Range(0,1)]
 	public float persistance;
 	public float lacunarity;
-
+	public const int sizeMapChunk = 241;
 	public int seed;
 	public UnityEngine.Vector2 offset;
 
 	public float heightMultiplier;
 	public AnimationCurve meshHeightCurve;
 
-	public bool autoUpdate;
+	//public bool autoUpdate;
+	public bool autoUpdate = false;
 	public TerrainType[] regions;
+	Queue <MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
+	Queue <MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
 
-	public void GenerateMap() {
-		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
-
-		Color[] colorMap = new Color[mapWidth*mapHeight];
-		for (int y = 0; y < mapHeight; y++) {
-			for (int x = 0; x < mapWidth; x++) {
-				float currentHeight = noiseMap[x, y];
-				for (int i = 0; i < regions.Length; i++) {
-					if (currentHeight <= regions[i].height) {
-						colorMap[y*mapWidth + x] = regions[i].colour;
-						break;
-					}
-				}
-			}
-		}
-
+	public void drawMapEditor() {
 		string decorsObjectName = "Decors";
 		GameObject[] existingDecorObjects = GameObject.FindGameObjectsWithTag(decorsObjectName);
 		for (int i = 0; i < existingDecorObjects.Length; i++) {
@@ -57,18 +55,18 @@ public class MapGenerator : MonoBehaviour {
 		GameObject decorsObject = new GameObject();
 		decorsObject.name = decorsObjectName;
 		decorsObject.tag = decorsObjectName;
+		MapData mapData = GenerateChunkMap(UnityEngine.Vector2.zero, decorsObject);
 
 		MapDisplay display = FindObjectOfType<MapDisplay> ();
 		if (drawMode == DrawMode.NoiseMap) {
-			display.DrawTexture(TextureGenerator.HeightMapToTexture(noiseMap));
+			display.DrawTexture(TextureGenerator.HeightMapToTexture(mapData.heightMap));
 		} else if (drawMode == DrawMode.ColorMap) {
-			display.DrawTexture(TextureGenerator.ColorMapToTexture(colorMap, mapWidth, mapHeight));
+			display.DrawTexture(TextureGenerator.ColorMapToTexture(mapData.colourMap, sizeMapChunk, sizeMapChunk));
 		} else if (drawMode == DrawMode.Mesh) {
-			UnityEngine.Vector2 sampleRegionSize = new UnityEngine.Vector2(mapWidth, mapHeight);
-			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, heightMultiplier, meshHeightCurve), heightMultiplier, regions);
-			
+			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, heightMultiplier, meshHeightCurve, levelOfDetail), heightMultiplier, regions);
+			UnityEngine.Vector2 sampleRegionSize = new UnityEngine.Vector2(sizeMapChunk, sizeMapChunk);
 			for (int i = 0; i < regions.Length; i++) {
-
+				
 				GameObject regionsObject = new GameObject();
 				regionsObject.name = regions[i].name;
 				regionsObject.transform.SetParent(decorsObject.transform);
@@ -78,29 +76,85 @@ public class MapGenerator : MonoBehaviour {
 				if (i != 0) {
 					low = regions[i - 1].height;
 				}
-				bool[,] regionMap = GetRegion(mapWidth, mapHeight, noiseMap, regions[i].height, low);
+				float high = regions[i].height;
 
+				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, low, high);
 				List<DecorGenerator.PoissonCoord> decorCoords = DecorGenerator.GeneratePoints(decors, sampleRegionSize, regions[i].numberOfDecors, regionMap);
-				PlaceDecor(decorCoords, noiseMap, decors, regionsObject);
-			}
+				PlaceDecor(decorCoords, mapData.heightMap, decors, regionsObject);		
+				
 
-		} else if (drawMode == DrawMode.DecorMap) {
-			Color[] decorMap = new Color[mapWidth*mapHeight];
-			for (int i = 0; i < regions.Length; i++) {
-				float low = 0;
-				if (i != 0) {
-					low = regions[i - 1].height;
-				}
-				bool[,] regionMap = GetRegion(mapWidth, mapHeight, noiseMap, regions[i].height, low);
-				decorMap = DecorGenerator.GenerateDecorMap(colorMap, mapWidth, mapHeight, regions[i].decors, regionMap, regions[i].numberOfDecors);
 			}
-			display.DrawTexture(TextureGenerator.ColorMapToTexture(decorMap, mapWidth, mapHeight));
+		} 
+	}
+
+	public void RequestMapData(UnityEngine.Vector2 offSetCoord, Action<MapData> callback, GameObject decorsThreadSafe) {
+		ThreadStart threadStart = delegate {
+			mapDataThread(offSetCoord, callback, decorsThreadSafe);
+		};
+		new Thread(threadStart).Start();
+	}
+
+	void mapDataThread(UnityEngine.Vector2 offsetCoord,Action <MapData> callback, GameObject decorsThreadSafe){
+
+		MapData mapData = GenerateChunkMap(offsetCoord, decorsThreadSafe);
+		lock (mapDataThreadInfoQueue) {
+			mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback,mapData));
 		}
 	}
 
-	public bool[,] GetRegion(int width, int height, float[,] heightMap, float high, float low) {
-		bool[,] region = new bool[width, height];
+	public void RequestMeshData(MapData mapData, Action<MeshData> callback) {
+		ThreadStart threadStart = delegate {
+			MeshDataThread (mapData, callback);
+		};
 
+		new Thread (threadStart).Start ();
+	}
+
+	void MeshDataThread(MapData mapData, Action <MeshData> callback){
+		MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightMap,heightMultiplier,meshHeightCurve,levelOfDetail);
+		lock (meshDataThreadInfoQueue) {
+			meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback,meshData));
+		}
+	}
+
+	void Update()
+	{
+		if (mapDataThreadInfoQueue.Count > 0) {
+			for (int i =0; i< mapDataThreadInfoQueue.Count; i++) {
+				MapThreadInfo<MapData> threadInfo = mapDataThreadInfoQueue.Dequeue();
+				threadInfo.callback(threadInfo.parameter);
+			}
+		}
+		if (meshDataThreadInfoQueue.Count > 0) {
+			for (int i =0; i< meshDataThreadInfoQueue.Count; i++) {
+				MapThreadInfo<MeshData> threadInfo = meshDataThreadInfoQueue.Dequeue();
+				threadInfo.callback(threadInfo.parameter);
+			}
+		}
+	}
+
+	MapData GenerateChunkMap(UnityEngine.Vector2 offsetCoord, GameObject decorsThreadSafe) {
+		float[,] noiseMap = Noise.GenerateNoiseMap(sizeMapChunk, sizeMapChunk, seed, noiseScale, octaves, persistance, lacunarity,offsetCoord + offset, normalizeMode);
+
+		Color[] colorMap = new Color[sizeMapChunk*sizeMapChunk];
+		for (int y = 0; y < sizeMapChunk; y++) {
+			for (int x = 0; x < sizeMapChunk; x++) {
+				float currentHeight = noiseMap[x, y];
+
+				for (int i = 0; i < regions.Length-1; i++) {
+					if (currentHeight < regions[i+1].height) {
+						colorMap[y*sizeMapChunk + x] = regions[i].colour;
+						break;
+					}
+				}						
+			}
+		}
+		return new MapData(noiseMap,colorMap,decorsThreadSafe);
+	}
+
+	public bool[,] GetRegion(int width, int height, float[,] heightMap, float low, float high) {
+		bool[,] region = new bool[width, height];
+		
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				float currentHeight = heightMap[i, j];
@@ -146,6 +200,18 @@ public class MapGenerator : MonoBehaviour {
             decor.transform.SetParent(parentObject.transform);
         }
     }
+
+
+	struct MapThreadInfo<T> {
+		public readonly Action<T> callback;
+		public readonly T parameter;
+
+		public MapThreadInfo(Action<T> callback , T paramater) {
+			this.callback = callback;
+			this.parameter = paramater;
+		}
+
+	}
 }
 
 [System.Serializable]
@@ -155,7 +221,19 @@ public struct TerrainType {
 	public int numberOfDecors;
 	public DecorGenerator.Decor[] decors;
 	public Color colour;
+
 	public float TilesTexture;
 	public Texture2D textureDiffuse;
 	public Texture2D textureNormal;
+}
+
+public struct MapData {
+	public float[,] heightMap;
+	public Color[] colourMap;
+	public GameObject DecorChunckObjects;
+	public MapData(float[,] heightMap, Color[] colourMap, GameObject arrayDecorsObject) {
+		this.heightMap = heightMap;
+		this.colourMap = colourMap;
+		this.DecorChunckObjects = arrayDecorsObject;
+	}
 }
