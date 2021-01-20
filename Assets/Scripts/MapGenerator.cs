@@ -65,65 +65,49 @@ public class MapGenerator : MonoBehaviour {
 		} else if (drawMode == DrawMode.Mesh) {
 			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, heightMultiplier, meshHeightCurve, levelOfDetail), heightMultiplier, regions);
 
-
 			for (int i = 0; i < regions.Length; i++) {
 				
-			GameObject regionsObject = new GameObject();
-			regionsObject.name = regions[i].name;
-			regionsObject.transform.SetParent(decorsObject.transform);
+				GameObject regionsObject = new GameObject();
+				regionsObject.name = regions[i].name;
+				regionsObject.transform.SetParent(decorsObject.transform);
 
-			DecorGenerator.Decor[] decors = regions[i].decors;
-			float high = 1;
-			if (i != regions.Length -1 ) {
-				high = regions[i+1].height;
-			} 
-			bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, regions[i].height, high);
-		
-			
-			for (int j = 0; j < decors.Length; j++) {
-				GameObject parentObject = new GameObject();
-				parentObject.transform.SetParent(regionsObject.transform);
-				parentObject.name = decors[j].name;
-
-			//	UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
-				
-				System.Random prng = new System.Random(seed);
-				print(decors.Length);
-				int cpt = 0;
-				int maxLoop = 3000;
-				int lp = 0;
-				UnityEngine.Vector2[] decorCoords = new UnityEngine.Vector2[decors[j].number];
-				print(decors[j].number);
-				while (cpt < decors[j].number && lp < maxLoop) {
-					
-					int x = prng.Next(0, sizeMapChunk);
-					int y = prng.Next(0, sizeMapChunk);
-					if (regionMap[x, y]) {
-						decorCoords[cpt] = new UnityEngine.Vector2(x, y);
-						cpt++;
-					}
-					lp++;
-				}
-
-				PlaceDecor(decorCoords, mapData.heightMap, decors[j].name, decors[j].scale, decors[j].mesh, parentObject);
-			}
-		}
-			
-		
-		/*} else if (drawMode == DrawMode.DecorMap) {
-			Color[] decorMap = new Color[sizeMapChunk*sizeMapChunk];
-			for (int i = 0; i < regions.Length; i++) {
+				DecorGenerator.Decor[] decors = regions[i].decors;
 				float low = 0;
 				if (i != 0) {
 					low = regions[i - 1].height;
 				}
-				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, regions[i].height, low);
-				decorMap = DecorGenerator.GenerateDecorMap(mapData.colourMap, sizeMapChunk, sizeMapChunk, regions[i].decors, regionMap);
-			}
-			display.DrawTexture(TextureGenerator.ColorMapToTexture(decorMap, sizeMapChunk, sizeMapChunk));*/
-		}
-	}
+				float high = regions[i].height;
 
+				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, low, high);
+		
+				for (int j = 0; j < decors.Length; j++) {
+					GameObject parentObject = new GameObject();
+					parentObject.transform.SetParent(regionsObject.transform);
+					parentObject.name = decors[j].name;
+
+					List<UnityEngine.Vector2> decorCoords = DecorGenerator.GenerateDecor(sizeMapChunk, sizeMapChunk, decors[j].number, decors[j].seed, regionMap);
+					for (int k = 0; k < decorCoords.Count; k++) {
+						int x = (int)decorCoords[k].x;
+						int y = (int)decorCoords[k].y;
+					}
+
+					PlaceDecor(decorCoords, mapData.heightMap, decors[j].name, decors[j].scale, decors[j].mesh, parentObject);
+				}
+			}
+		} 
+		// else if (drawMode == DrawMode.DecorMap) {
+		// 	Color[] decorMap = new Color[sizeMapChunk*sizeMapChunk];
+		// 	for (int i = 0; i < regions.Length; i++) {
+		// 		float low = 0;
+		// 		if (i != 0) {
+		// 			low = regions[i - 1].height;
+		// 		}
+		// 		bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, regions[i].height, low);
+		// 		decorMap = DecorGenerator.GenerateDecorMap(mapData.colourMap, sizeMapChunk, sizeMapChunk, regions[i].decors, regionMap);
+		// 	}
+		// 	display.DrawTexture(TextureGenerator.ColorMapToTexture(decorMap, sizeMapChunk, sizeMapChunk));
+		// }
+	}
 
 	public void RequestMapData(UnityEngine.Vector2 offSetCoord, Action<MapData> callback, GameObject decorsThreadSafe) {
 		ThreadStart threadStart = delegate {
@@ -191,9 +175,9 @@ public class MapGenerator : MonoBehaviour {
 		return new MapData(noiseMap,colorMap,decorsThreadSafe);
 	}
 
-	public bool[,] GetRegion(int width, int height, float[,] heightMap, float high, float low) {
+	public bool[,] GetRegion(int width, int height, float[,] heightMap, float low, float high) {
 		bool[,] region = new bool[width, height];
-
+		
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				float currentHeight = heightMap[i, j];
@@ -204,11 +188,10 @@ public class MapGenerator : MonoBehaviour {
 		return region;
 	}
 
-	public void PlaceDecor(UnityEngine.Vector2[] decorCoords, float[,] heightMap, string name, float scale, GameObject decorObject, GameObject parentObject)
+	public void PlaceDecor(List<UnityEngine.Vector2> decorCoords, float[,] heightMap, string name, float scale, GameObject decorObject, GameObject parentObject)
     {
 		
 		if (decorObject == null) {
-			UnityEngine.Debug.Log("Decors null");
 			return;
 		}
 		int width = heightMap.GetLength(0);
@@ -216,7 +199,7 @@ public class MapGenerator : MonoBehaviour {
         float topLeftX = (width - 1)/-2f;
         float topLeftZ = (height - 1)/2f;
 
-        for (int i = 0; i < decorCoords.Length; i++)
+        for (int i = 0; i < decorCoords.Count; i++)
         {
 			int x = (int)decorCoords[i].x;
 			int y = (int)decorCoords[i].y;
@@ -230,7 +213,6 @@ public class MapGenerator : MonoBehaviour {
             rotation.z = decor.transform.rotation.z;
             decor.transform.rotation = rotation;
             decor.transform.SetParent(parentObject.transform);
-			//UnityEngine.Debug.Log("x : "+x.ToString()+ " y: " +y.ToString());
         }
     }
 

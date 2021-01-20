@@ -17,20 +17,17 @@ public static class DecorGenerator
         public Color color;
     }
 
-    public static UnityEngine.Vector2[] GenerateDecor(int width, int height, int decors, int seed, bool[,] regionMap) {
+    public static List<UnityEngine.Vector2> GenerateDecor(int width, int height, int decors, int seed, bool[,] regionMap) {
 
         System.Random prng = new System.Random(seed);
+		List<UnityEngine.Vector2> decorCoords = new List<UnityEngine.Vector2>();
         
-        int cpt = 0;
-		UnityEngine.Vector2[] decorCoords = new UnityEngine.Vector2[decors];
-        
-		while (cpt < decors) {
+		for (int i = 0; i < decors; i++) {
 			int x = prng.Next(0, width);
 			int y = prng.Next(0, height);
 
             if (regionMap[x, y]) {
-			    decorCoords[cpt] = new UnityEngine.Vector2(x, y);
-                cpt++;
+			    decorCoords.Add(new UnityEngine.Vector2(x, y));
             }
 		}
 
@@ -45,8 +42,8 @@ public static class DecorGenerator
         }
 
         for (int i = 0; i < decors.Length; i++) {
-			UnityEngine.Vector2[] decorCoords = DecorGenerator.GenerateDecor(width, height, decors[i].number, decors[i].seed, regionMap);
-            for (int j = 0; j < decorCoords.Length; j++) {
+			List<UnityEngine.Vector2> decorCoords = DecorGenerator.GenerateDecor(width, height, decors[i].number, decors[i].seed, regionMap);
+            for (int j = 0; j < decorCoords.Count; j++) {
                decorMap[(int)(decorCoords[j].y*width + decorCoords[j].x)] = decors[i].color;
             }
 		}
