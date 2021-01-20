@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class EndlessTerrain : MonoBehaviour {
 
-	public const float maxViewDst = 500;
+	public const float maxViewDst = 1500;
 	public Transform viewer;
 	static MapGenerator mapGenerator;
 	public static Vector2 viewerPosition;
@@ -12,10 +12,13 @@ public class EndlessTerrain : MonoBehaviour {
 	int chunksVisibleInViewDst;
 	public Material mapMaterial;
 
+	TerrainType[] regions;
+
 	Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
 	List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
 
 	void Start() {
+		regions = FindObjectOfType<MapGenerator>().regions;
 		mapGenerator = FindObjectOfType<MapGenerator>();
 		chunkSize = MapGenerator.sizeMapChunk - 1;
 		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
@@ -46,11 +49,16 @@ public class EndlessTerrain : MonoBehaviour {
 						terrainChunksVisibleLastUpdate.Add (terrainChunkDictionary [viewedChunkCoord]);
 					}
 				} else {
-					terrainChunkDictionary.Add (viewedChunkCoord, new TerrainChunk (viewedChunkCoord, chunkSize, transform, mapMaterial));
+					terrainChunkDictionary.Add (viewedChunkCoord, new TerrainChunk (viewedChunkCoord, chunkSize, transform, mapMaterial,regions));
 				}
 
 			}
 		}
+	}
+
+
+	public class DecorsChunk {
+
 	}
 
 	public class TerrainChunk {
@@ -61,8 +69,10 @@ public class EndlessTerrain : MonoBehaviour {
 		MeshRenderer meshRenderer;
 		MeshFilter meshFilter;
 
+		//MeshFilter planeWater;
 
-		public TerrainChunk(Vector2 coord, int size, Transform parent, Material material) {
+
+		public TerrainChunk(Vector2 coord, int size, Transform parent, Material material, TerrainType[]  regions) {
 			position = coord * size;
 			bounds = new Bounds(position,Vector2.one * size);
 			Vector3 positionV3 = new Vector3(position.x,0,position.y);
@@ -75,18 +85,37 @@ public class EndlessTerrain : MonoBehaviour {
 			decorsObject.name = decorsObjectName;
 			decorsObject.tag = decorsObjectName;
 			decorsObject.transform.SetParent(meshObject.transform);
+			//List<GameObject> listRegionGameObject = new List<GameObject>();
+			List<List<GameObject>> listAllGameDecordObject = new List<List<GameObject>>();
 
+			for (int i =0; i< regions.Length ; i++) {
 
-
+				List<GameObject> listBasicGameObject = new List<GameObject>();
+				GameObject regionObject = new GameObject();
+				regionObject.name = regions[i].name;
+				regionObject.transform.SetParent(decorsObject.transform);
+				//listRegionGameObject.Add(regionObject);
+				print(regions[i].densityOfDecors);
+				for (int j=0 ; j<regions[i].densityOfDecors ; j++) {
+					GameObject basic = new GameObject();
+					basic.name = regions[i].name+ j.ToString();
+					basic.transform.SetParent(regionObject.transform);
+					listBasicGameObject.Add(basic);
+				}
+				listAllGameDecordObject.Add(listBasicGameObject);
+			}
+			//print("terrainChunk size list  " + listRegionGameObject.Count);
 			meshRenderer = meshObject.AddComponent<MeshRenderer>();
 			meshFilter = meshObject.AddComponent<MeshFilter>();
 			meshObject.transform.position = positionV3;
 			meshObject.transform.parent = parent;
 			meshRenderer.material = material;
 			SetVisible(false);
-			mapGenerator.RequestMapData(position,onMapDataReceive,decorsObject);
-			
+			mapGenerator.RequestMapData(position,onMapDataReceive,decorsObject,listAllGameDecordObject);
+
 		}
+
+
 
 		public void UpdateTerrainChunk() {
 			float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance (viewerPosition));
@@ -108,14 +137,7 @@ public class EndlessTerrain : MonoBehaviour {
 
 		void onMeshDataReceive (MeshData meshData) {
 			meshFilter.mesh = meshData.CreateMesh();
+			//planeWater.mesh = meshData.CreateMesh();
 		}
-	}
-
-	public class DecorsManagerChunk {
-		float[] NormalizeNumberofDecors;
-		public DecorGenerator.Decor[] Initaldecors;
-
-		
-
 	}
 }

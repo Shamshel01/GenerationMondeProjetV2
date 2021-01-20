@@ -57,17 +57,17 @@ public static class DecorGenerator
 		PoissonCoord startPoint;
 		startPoint.coords = sampleRegionSize/2;
 
-		startPoint.index = UnityEngine.Random.Range(0, objects.Length);
+		startPoint.index =  new System.Random().Next(0,objects.Length);
 
 		spawnPoints.Add(startPoint);
 		while (spawnPoints.Count > 0 && points.Count < numberOfPoints) {
 
-			int objIndex = UnityEngine.Random.Range(0, objects.Length);
+			int objIndex = new System.Random().Next(0,objects.Length);
 			float radius = objects[objIndex].radius;
 			float rejectionSamples = objects[objIndex].rejectionSamples;
 			
 
-			int spawnIndex = UnityEngine.Random.Range(0,spawnPoints.Count);
+			int spawnIndex = new System.Random().Next(0,spawnPoints.Count);
 			PoissonCoord spawnCentre = spawnPoints[spawnIndex];
 			bool candidateAccepted = false;
 
