@@ -27,7 +27,7 @@ public class Movement : MonoBehaviour
         if (isGrounded && velocity.y < 0) {
             velocity.y = -10.0f;
         }
-        UnityEngine.Debug.Log(velocity.ToString());
+        //UnityEngine.Debug.Log(velocity.ToString());
 
         float dx = Input.GetAxis("Horizontal");
         float dy = Input.GetAxis("Vertical");

@@ -6,6 +6,8 @@ public class MapDisplay : MonoBehaviour {
 
 	public Renderer textureRender;
 	public MeshFilter meshFilter;
+	public MeshFilter meshFilterPlane;
+	
 	public MeshRenderer meshRenderer; 
 
 	public void DrawTexture(Texture2D texture) {
@@ -20,6 +22,11 @@ public class MapDisplay : MonoBehaviour {
 		Material mat = meshRenderer.sharedMaterial;
 		configureShaderFromRegions(mat, heightMultiplier, regions);
 		
+	}
+
+	public void DrawMeshPlane(MeshData meshData, Material waterMat) {
+		//meshFilterPlane.sharedMesh = meshData.CreateMesh();
+		//waterMat = meshRenderer.sharedMaterial;
 	}
 
 

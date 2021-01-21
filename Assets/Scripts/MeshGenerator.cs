@@ -32,6 +32,14 @@ public static class MeshGenerator
 
         return meshData;
     }
+
+
+    public static MeshData generatePlaneMesh(float[,] heightMap){
+        int width = heightMap.GetLength(0);
+        int height = heightMap.GetLength(1);
+        MeshData meshData = new MeshData(width, height);
+        return meshData;
+    }
 }
 
 public class MeshData {
