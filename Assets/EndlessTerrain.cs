@@ -68,6 +68,7 @@ public class EndlessTerrain : MonoBehaviour {
 			Vector3 positionV3 = new Vector3(position.x,0,position.y);
 
 			meshObject = new GameObject("Terrain Chunk");
+			
 
 
 			string decorsObjectName = "Decors";
@@ -108,6 +109,9 @@ public class EndlessTerrain : MonoBehaviour {
 
 		void onMeshDataReceive (MeshData meshData) {
 			meshFilter.mesh = meshData.CreateMesh();
+			meshObject.layer = 8;
+			MeshCollider meshCollider = meshObject.AddComponent(typeof(MeshCollider)) as MeshCollider;
+			meshCollider.sharedMesh = meshFilter.mesh;
 		}
 	}
 
