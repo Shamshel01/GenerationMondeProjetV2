@@ -46,7 +46,7 @@ public class MapGenerator : MonoBehaviour {
 	Queue <MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue <MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
-
+	
 	public void drawMapEditor() {
 		string decorsObjectName = "Decors";
 		GameObject[] existingDecorObjects = GameObject.FindGameObjectsWithTag(decorsObjectName);
@@ -121,7 +121,7 @@ public class MapGenerator : MonoBehaviour {
 				}
 				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, low, high);
 				List<DecorGenerator.PoissonCoord> decorCoords = DecorGenerator.GeneratePoints(decors, sampleRegionSize, regions[i].densityOfDecors, regionMap);
-				PlaceDecorsThreadSafe(decorCoords, mapData.heightMap, decors, listAllGameDecordObject[i]);
+				//PlaceDecorsThreadSafe(decorCoords, mapData.heightMap, decors, listAllGameDecordObject[i]);
 			}
 
 
@@ -225,7 +225,7 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-		public void PlaceDecorsThreadSafe(List<DecorGenerator.PoissonCoord> decorCoords, float[,] heightMap, DecorGenerator.Decor[] decors, List<GameObject> listGameObject) {
+		/*public void PlaceDecorsThreadSafe(List<DecorGenerator.PoissonCoord> decorCoords, float[,] heightMap, DecorGenerator.Decor[] decors, List<GameObject> listGameObject) {
 		int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
         float topLeftX = (width - 1)/-2f;
@@ -266,7 +266,7 @@ public class MapGenerator : MonoBehaviour {
             
            
         }
-    }
+    }*/
 
 
 
