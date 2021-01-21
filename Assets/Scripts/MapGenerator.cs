@@ -57,7 +57,7 @@ public class MapGenerator : MonoBehaviour {
 		GameObject decorsObject = new GameObject();
 		decorsObject.name = decorsObjectName;
 		decorsObject.tag = decorsObjectName;
-		MapData mapData = GenerateChunkMap(UnityEngine.Vector2.zero, decorsObject);
+		MapData mapData = GenerateChunkMap(UnityEngine.Vector2.zero);
 
 		MapDisplay display = FindObjectOfType<MapDisplay> ();
 		if (drawMode == DrawMode.NoiseMap) {
@@ -67,6 +67,13 @@ public class MapGenerator : MonoBehaviour {
 		} else if (drawMode == DrawMode.Mesh) {
 			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, heightMultiplier, meshHeightCurve, levelOfDetail), heightMultiplier, regions);
 			//display.DrawMeshPlane(MeshGenerator.generatePlaneMesh(mapData.heightMap), waterMat);
+			AffectDecorsMainThread(decorsObject, mapData, UnityEngine.Vector2.zero);
+		} 
+	}
+
+
+
+	public void AffectDecorsMainThread(GameObject decorsObject, MapData mapData, UnityEngine.Vector2 offSetChunk) {
 			UnityEngine.Vector2 sampleRegionSize = new UnityEngine.Vector2(sizeMapChunk, sizeMapChunk);
 			for (int i = 0; i < regions.Length; i++) {
 				
@@ -83,49 +90,29 @@ public class MapGenerator : MonoBehaviour {
 				}
 				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, low, high);
 				List<DecorGenerator.PoissonCoord> decorCoords = DecorGenerator.GeneratePoints(decors, sampleRegionSize, regions[i].densityOfDecors, regionMap);
-				PlaceDecor(decorCoords, mapData.heightMap, decors, regionsObject);		
+				PlaceDecor(decorCoords, mapData.heightMap, decors, regionsObject, offSetChunk);		
 				
 
 			}
-		} 
+
 	}
 
-	public void RequestMapData(UnityEngine.Vector2 offSetCoord, Action<MapData> callback, GameObject decorsThreadSafe,List<List<GameObject>> listAllGameDecordObject) {
+	public void RequestMapData(UnityEngine.Vector2 offSetCoord, Action<MapData> callback) {
 		ThreadStart threadStart = delegate {
-			mapDataThread(offSetCoord, callback, decorsThreadSafe,listAllGameDecordObject);
+			mapDataThread(offSetCoord, callback);
 		};
 		new Thread(threadStart).Start();
 	}
 
-	void mapDataThread(UnityEngine.Vector2 offsetCoord,Action <MapData> callback, GameObject decorsThreadSafe,List<List<GameObject>> listAllGameDecordObject){
+	void mapDataThread(UnityEngine.Vector2 offsetCoord,Action <MapData> callback){
 
-		MapData mapData = GenerateChunkMap(offsetCoord, decorsThreadSafe);
-		//generateDecorsChunk(mapData, decorsThreadSafe,listAllGameDecordObject);
+		MapData mapData = GenerateChunkMap(offsetCoord);
 		lock (mapDataThreadInfoQueue) {
 			mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback,mapData));
 		}
 	}
-	void generateDecorsChunk(MapData mapData, GameObject decorsThreadSafe, List<List<GameObject>> listAllGameDecordObject) {
 
-		UnityEngine.Vector2 sampleRegionSize = new UnityEngine.Vector2(sizeMapChunk, sizeMapChunk);
-			for (int i = 0; i < regions.Length; i++) {
-
-
-				DecorGenerator.Decor[] decors = regions[i].decors;
-				//print(listRegionGameObject.Count);
-				
-				float low = regions[i].height;
-				float high = 1;
-				if (i != regions.Length - 1) {
-					high = regions[i + 1].height;
-				}
-				bool[,] regionMap = GetRegion(sizeMapChunk, sizeMapChunk, mapData.heightMap, low, high);
-				List<DecorGenerator.PoissonCoord> decorCoords = DecorGenerator.GeneratePoints(decors, sampleRegionSize, regions[i].densityOfDecors, regionMap);
-				//PlaceDecorsThreadSafe(decorCoords, mapData.heightMap, decors, listAllGameDecordObject[i]);
-			}
-
-
-	}
+	
 	public void RequestMeshData(MapData mapData, Action<MeshData> callback) {
 		ThreadStart threadStart = delegate {
 			MeshDataThread (mapData, callback);
@@ -157,7 +144,7 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
-	MapData GenerateChunkMap(UnityEngine.Vector2 offsetCoord, GameObject decorsThreadSafe) {
+	MapData GenerateChunkMap(UnityEngine.Vector2 offsetCoord) {
 		float[,] noiseMap = Noise.GenerateNoiseMap(sizeMapChunk, sizeMapChunk, seed, noiseScale, octaves, persistance, lacunarity,offsetCoord + offset, normalizeMode);
 
 		Color[] colorMap = new Color[sizeMapChunk*sizeMapChunk];
@@ -173,7 +160,7 @@ public class MapGenerator : MonoBehaviour {
 				}						
 			}
 		}
-		return new MapData(noiseMap,colorMap,decorsThreadSafe);
+		return new MapData(noiseMap,colorMap);
 	}
 
 	public bool[,] GetRegion(int width, int height, float[,] heightMap, float low, float high) {
@@ -185,11 +172,10 @@ public class MapGenerator : MonoBehaviour {
 				region[i, j] = currentHeight > low && currentHeight < high;
 			}
 		}
-
 		return region;
 	}
 
-	public void PlaceDecor(List<DecorGenerator.PoissonCoord> decorCoords, float[,] heightMap, DecorGenerator.Decor[] decors, GameObject parentObject) {
+	public void PlaceDecor(List<DecorGenerator.PoissonCoord> decorCoords, float[,] heightMap, DecorGenerator.Decor[] decors, GameObject parentObject, UnityEngine.Vector2 offSetChunk) {
 		int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
         float topLeftX = (width - 1)/-2f;
@@ -204,7 +190,7 @@ public class MapGenerator : MonoBehaviour {
 
 			float currentHeight = heightMap[x, y]*heightMultiplier*meshHeightCurve.Evaluate(heightMap[x, y]);
 			DecorGenerator.Decor decorToPlace = decors[decorCoords[i].index];
-            UnityEngine.Vector3 position = new UnityEngine.Vector3(topLeftX + x, currentHeight, topLeftZ - y);
+            UnityEngine.Vector3 position = new UnityEngine.Vector3(topLeftX + x +offSetChunk.x, currentHeight, topLeftZ - y + offSetChunk.y);
             GameObject decor = Instantiate(decorToPlace.mesh, position, decorToPlace.mesh.transform.rotation);
 			decor.name = name + "_" + i.ToString();
 
@@ -224,50 +210,6 @@ public class MapGenerator : MonoBehaviour {
             decor.transform.SetParent(parentObject.transform);
         }
     }
-
-		/*public void PlaceDecorsThreadSafe(List<DecorGenerator.PoissonCoord> decorCoords, float[,] heightMap, DecorGenerator.Decor[] decors, List<GameObject> listGameObject) {
-		int width = heightMap.GetLength(0);
-        int height = heightMap.GetLength(1);
-        float topLeftX = (width - 1)/-2f;
-        float topLeftZ = (height - 1)/2f;
- 
-        System.Random prng = new System.Random();
-
-        for (int i = 0; i < decorCoords.Count; i++)
-        {
-			GameObject decorsFromlist = listGameObject[i];
-			int x = (int)decorCoords[i].coords.x;
-			int y = (int)decorCoords[i].coords.y;
-
-			float currentHeight = heightMap[x, y]*heightMultiplier*meshHeightCurve.Evaluate(heightMap[x, y]);
-			DecorGenerator.Decor decorToPlace = decors[decorCoords[i].index];
-            UnityEngine.Vector3 position = new UnityEngine.Vector3(topLeftX + x, currentHeight, topLeftZ - y);
-			MeshFilter meshToCopy = decorToPlace.mesh.GetComponent<MeshFilter>();
-
-
-			//meshToCopy.sharedMesh = Resources.Load<Mesh>();
-            //GameObject decor = Instantiate(decorToPlace.mesh, position, decorToPlace.mesh.transform.rotation);
-
-			decorsFromlist = Instantiate(decorToPlace.mesh, position, decorToPlace.mesh.transform.rotation);
-			//decor.name = name + "_" + i.ToString();
-
-			float scaleDif = decorToPlace.scaleDif;
-			if (scaleDif > 1) {
-				scaleDif = 1;
-			} else if (scaleDif < 0) {
-				scaleDif = 0;
-			}
-
-			float randomScale = decorToPlace.scale*(1.0f + (2*(float)prng.NextDouble() - 1)*scaleDif);
-			decorsFromlist.transform.localScale = new UnityEngine.Vector3(randomScale, randomScale, randomScale);
-            UnityEngine.Quaternion rotation = UnityEngine.Random.rotation;
-            rotation.x = decorsFromlist.transform.rotation.x;
-            rotation.z = decorsFromlist.transform.rotation.z;
-            
-           
-        }
-    }*/
-
 
 
 	struct MapThreadInfo<T> {
@@ -298,10 +240,8 @@ public struct TerrainType {
 public struct MapData {
 	public float[,] heightMap;
 	public Color[] colourMap;
-	public GameObject DecorChunckObjects;
-	public MapData(float[,] heightMap, Color[] colourMap, GameObject arrayDecorsObject) {
+	public MapData(float[,] heightMap, Color[] colourMap) {
 		this.heightMap = heightMap;
 		this.colourMap = colourMap;
-		this.DecorChunckObjects = arrayDecorsObject;
 	}
 }

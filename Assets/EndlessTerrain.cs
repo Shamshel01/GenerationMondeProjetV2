@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class EndlessTerrain : MonoBehaviour {
 
-	public const float maxViewDst = 1500;
+	public const float maxViewDst = 450;
 	public Transform viewer;
 	static MapGenerator mapGenerator;
 	public static Vector2 viewerPosition;
@@ -69,11 +69,15 @@ public class EndlessTerrain : MonoBehaviour {
 		MeshRenderer meshRenderer;
 		MeshFilter meshFilter;
 
+		GameObject DecorsObject;
+
+		Vector2 decorsCoordOffset;
 		//MeshFilter planeWater;
 
 
 		public TerrainChunk(Vector2 coord, int size, Transform parent, Material material, TerrainType[]  regions) {
 			position = coord * size;
+			decorsCoordOffset = position;
 			bounds = new Bounds(position,Vector2.one * size);
 			Vector3 positionV3 = new Vector3(position.x,0,position.y);
 
@@ -82,29 +86,11 @@ public class EndlessTerrain : MonoBehaviour {
 
 
 			string decorsObjectName = "Decors";
-			GameObject decorsObject = new GameObject();
-			decorsObject.name = decorsObjectName;
-			decorsObject.tag = decorsObjectName;
-			decorsObject.transform.SetParent(meshObject.transform);
-			//List<GameObject> listRegionGameObject = new List<GameObject>();
-			List<List<GameObject>> listAllGameDecordObject = new List<List<GameObject>>();
-
-			for (int i =0; i< regions.Length ; i++) {
-
-				List<GameObject> listBasicGameObject = new List<GameObject>();
-				GameObject regionObject = new GameObject();
-				regionObject.name = regions[i].name;
-				regionObject.transform.SetParent(decorsObject.transform);
-				//listRegionGameObject.Add(regionObject);
-				print(regions[i].densityOfDecors);
-				for (int j=0 ; j<regions[i].densityOfDecors ; j++) {
-					GameObject basic = new GameObject();
-					basic.name = regions[i].name+ j.ToString();
-					basic.transform.SetParent(regionObject.transform);
-					listBasicGameObject.Add(basic);
-				}
-				listAllGameDecordObject.Add(listBasicGameObject);
-			}
+			DecorsObject = new GameObject();
+			DecorsObject.name = decorsObjectName;
+			DecorsObject.tag = decorsObjectName;
+			DecorsObject.transform.SetParent(meshObject.transform);
+	
 			//print("terrainChunk size list  " + listRegionGameObject.Count);
 			meshRenderer = meshObject.AddComponent<MeshRenderer>();
 			meshFilter = meshObject.AddComponent<MeshFilter>();
@@ -112,7 +98,7 @@ public class EndlessTerrain : MonoBehaviour {
 			meshObject.transform.parent = parent;
 			meshRenderer.material = material;
 			SetVisible(false);
-			mapGenerator.RequestMapData(position,onMapDataReceive,decorsObject,listAllGameDecordObject);
+			mapGenerator.RequestMapData(position,onMapDataReceive);
 
 		}
 
@@ -133,6 +119,9 @@ public class EndlessTerrain : MonoBehaviour {
 		}
 
 		void onMapDataReceive (MapData mapData) {
+			//GameObject issou = new GameObject();
+
+			mapGenerator.AffectDecorsMainThread(DecorsObject, mapData, decorsCoordOffset);
 			mapGenerator.RequestMeshData(mapData,onMeshDataReceive);
 		}
 
