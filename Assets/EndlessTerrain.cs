@@ -7,6 +7,8 @@ public class EndlessTerrain : MonoBehaviour {
 	public const float maxViewDst = 450;
 	public Transform viewer;
 	static MapGenerator mapGenerator;
+
+	static MapDisplay display;
 	public static Vector2 viewerPosition;
 	int chunkSize;
 	int chunksVisibleInViewDst;
@@ -20,6 +22,7 @@ public class EndlessTerrain : MonoBehaviour {
 	void Start() {
 		regions = FindObjectOfType<MapGenerator>().regions;
 		mapGenerator = FindObjectOfType<MapGenerator>();
+		display = FindObjectOfType<MapDisplay>();
 		chunkSize = MapGenerator.sizeMapChunk - 1;
 		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
 	}
@@ -91,7 +94,6 @@ public class EndlessTerrain : MonoBehaviour {
 			DecorsObject.tag = decorsObjectName;
 			DecorsObject.transform.SetParent(meshObject.transform);
 	
-			//print("terrainChunk size list  " + listRegionGameObject.Count);
 			meshRenderer = meshObject.AddComponent<MeshRenderer>();
 			meshFilter = meshObject.AddComponent<MeshFilter>();
 			meshObject.transform.position = positionV3;
@@ -122,6 +124,7 @@ public class EndlessTerrain : MonoBehaviour {
 			//GameObject issou = new GameObject();
 
 			mapGenerator.AffectDecorsMainThread(DecorsObject, mapData, decorsCoordOffset);
+			mapGenerator.CreateWaterMesh(DecorsObject,mapData,mapGenerator.WaterLevel,decorsCoordOffset,display);
 			mapGenerator.RequestMeshData(mapData,onMeshDataReceive);
 		}
 

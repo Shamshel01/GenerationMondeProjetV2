@@ -33,13 +33,33 @@ public static class MeshGenerator
         return meshData;
     }
 
+    public static MeshData GeneratePlaneWaterMesh(MapData map, float waterLevel) {
+        int width = map.heightMap.GetLength(0);
+        int height = map.heightMap.GetLength(1);
+        float topLeftX = (width - 1)/-2f;
+        float topLeftZ = (height - 1)/2f;
+        int levelOfDetail = 6;
+        int meshSimplificationIncrement = (levelOfDetail ==0)?1:levelOfDetail*2;
+        int verticesPerLine = (width-1) / meshSimplificationIncrement +1;
+        MeshData meshData = new MeshData(verticesPerLine, verticesPerLine);
+        int vertexIndex = 0;
 
-    public static MeshData generatePlaneMesh(float[,] heightMap){
-        int width = heightMap.GetLength(0);
-        int height = heightMap.GetLength(1);
-        MeshData meshData = new MeshData(width, height);
+        for (int y = 0; y < height; y += meshSimplificationIncrement) {
+			for (int x = 0; x < width; x += meshSimplificationIncrement) {
+                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, 0, topLeftZ - y);
+                meshData.uvs[vertexIndex] = new Vector2(x/(float)width, y/(float)height);
+                
+                if (x < width - 1 && y < height - 1) {
+                    meshData.AddTriangles(vertexIndex, vertexIndex + verticesPerLine + 1, vertexIndex + verticesPerLine);
+                    meshData.AddTriangles(vertexIndex + verticesPerLine + 1, vertexIndex, vertexIndex + 1);
+                }
+                vertexIndex++;
+			}
+		}
+
         return meshData;
     }
+
 }
 
 public class MeshData {

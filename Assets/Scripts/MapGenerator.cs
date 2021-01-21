@@ -34,7 +34,7 @@ public class MapGenerator : MonoBehaviour {
 	public const int sizeMapChunk = 241;
 	public int seed;
 
-	public Material waterMat;
+	
 	public UnityEngine.Vector2 offset;
 
 	public float heightMultiplier;
@@ -43,6 +43,9 @@ public class MapGenerator : MonoBehaviour {
 	//public bool autoUpdate;
 	public bool autoUpdate = false;
 	public TerrainType[] regions;
+	public Material waterMat;
+
+	public float WaterLevel;
 	Queue <MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue <MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
@@ -68,11 +71,25 @@ public class MapGenerator : MonoBehaviour {
 			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, heightMultiplier, meshHeightCurve, levelOfDetail), heightMultiplier, regions);
 			//display.DrawMeshPlane(MeshGenerator.generatePlaneMesh(mapData.heightMap), waterMat);
 			AffectDecorsMainThread(decorsObject, mapData, UnityEngine.Vector2.zero);
+			CreateWaterMesh(decorsObject, mapData, WaterLevel, UnityEngine.Vector2.zero,display);
 		} 
 	}
 
 
+	public void CreateWaterMesh(GameObject decorsObject, MapData mapData, float WaterLevel, UnityEngine.Vector2 offSetPosition, MapDisplay display){
+		GameObject WaterObject = new GameObject();
+		WaterObject.transform.name = "WaterMesh";
+		WaterObject.transform.SetParent(decorsObject.transform);
+		MeshFilter meshFilter = WaterObject.AddComponent<MeshFilter>();
+		MeshRenderer meshRenderer = WaterObject.AddComponent<MeshRenderer>();
+		meshFilter.sharedMesh = display.DrawMeshPlane(MeshGenerator.GeneratePlaneWaterMesh(mapData,WaterLevel));
+		meshRenderer.material = waterMat;
 
+		WaterObject.transform.position = new UnityEngine.Vector3(WaterObject.transform.position.x + offSetPosition.x,WaterLevel,WaterObject.transform.position.z + offSetPosition.y);
+
+		//display.DrawMeshPlane()
+
+	}
 	public void AffectDecorsMainThread(GameObject decorsObject, MapData mapData, UnityEngine.Vector2 offSetChunk) {
 			UnityEngine.Vector2 sampleRegionSize = new UnityEngine.Vector2(sizeMapChunk, sizeMapChunk);
 			for (int i = 0; i < regions.Length; i++) {
