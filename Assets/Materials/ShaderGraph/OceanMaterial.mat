@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: OceanMaterial
+  m_Shader: {fileID: -6465566751694194690, guid: ef61c490da2b64842904d4c125813bef,
+    type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - Texture2D_26C109F6:
+        m_Texture: {fileID: 2800000, guid: 1aff7eb1d13662a4d95724692783c70f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_BC3B7EE0:
+        m_Texture: {fileID: 2800000, guid: 314964c5a5a73a14e9ade09d17a821fc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_C0764E4C:
+        m_Texture: {fileID: 2800000, guid: ba1757dc2facc914a873e7bb9ac0160d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - Vector1_15DA5301: 6.1
+    - Vector1_17B1471E: 0.1
+    - Vector1_1CB966EB: 10
+    - Vector1_4AAFA6B8: 0.05
+    - Vector1_533FCE93: 0.01
+    - Vector1_6C96CAAD: -0.1
+    - Vector1_81C51797: 1.5
+    - Vector1_8C8EF433: 0.8
+    - Vector1_AE790C3: 1.18
+    - Vector1_C64EEB5C: 1.8
+    - Vector1_E71DC1A9: 1.91
+    m_Colors:
+    - Color_6A82506F: {r: 0.62352943, g: 0.77040297, b: 0.7921569, a: 0}
+    - Color_9FDDF38E: {r: 0, g: 0.00002193451, b: 1, a: 0}
+    - Color_AB169CFD: {r: 0, g: 0.57878304, b: 0.6792453, a: 0}
+    - Color_AD0098C3: {r: 0.119526535, g: 0.5153042, b: 0.745283, a: 1}
+    - Vector2_958A3B2C: {r: -0.16, g: 0.5, b: 0, a: 0}

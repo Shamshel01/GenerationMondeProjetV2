@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/scene-pas-trop-degueu.unity
+    guid: 28759e4c21684754892cbfd78ee2aee2
   m_configObjects: {}

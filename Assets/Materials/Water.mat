@@ -31,9 +31,9 @@ Material:
     m_Floats:
     - _Depth: -0.53
     - _Displacement: 0.115
-    - _NormalStrength: 0.936
-    - _Smoothness: 0.912
-    - _Strenght: 0.266
+    - _NormalStrength: 0.242
+    - _Smoothness: 0.561
+    - _Strenght: 0.138
     m_Colors:
     - _Deep: {r: 0.043137256, g: 0.116668954, b: 0.9150943, a: 0.5803922}
     - _ShallowWater: {r: 0.2666667, g: 0.6814995, b: 0.8, a: 0.7647059}

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class EndlessTerrain : MonoBehaviour {
 
-	public const float maxViewDst = 450;
+	public const float maxViewDst = 500;
 	public Transform viewer;
 	static MapGenerator mapGenerator;
 
